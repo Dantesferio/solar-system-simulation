@@ -41,7 +41,8 @@ class Planet:
 
 		dx = self.position[0] - sun.position[0]
 		dy = self.position[1] - sun.position[1]
-		r = math.sqrt((dx*dx) + (dy*dy)) * (10**12)
+		d = math.sqrt((dx*dx) + (dy*dy))
+		r = d * (10**12)
 
 		if r != 0:
 			f = G * self.mass * sun.mass / (r*r)
@@ -54,8 +55,10 @@ class Planet:
 
 		acc = (f/self.mass) + self.acceleration
 		#self.acceleration = acc
-		ax = -acc * math.cos(alpha)
-		ay = -acc * math.sin(alpha)
+		#ax = -acc * math.cos(alpha)
+		#ay = -acc * math.sin(alpha)
+		ax = -acc * (dx/d) 
+		ay = -acc * (dy/d)
 
 		vx2 = self.velocity[0] + (ax * DELTA_T)
 		vy2 = self.velocity[1] + (ay * DELTA_T)
