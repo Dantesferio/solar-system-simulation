@@ -35,37 +35,40 @@ class Planet:
 	def draw(self, win):
 		pygame.draw.circle(win, self.color, self.position, self.size * 20)
 
-	def calculate_gravity(self, sun):
+	def calculate_gravity(self, other_planets):
 		delta_x = 0
 		delta_y = 0
+		
+		for planet in other_planets:
+			if planet == self:
+				continue
+			dx = self.position[0] - planet.position[0]
+			dy = self.position[1] - planet.position[1]
+			d = math.sqrt((dx*dx) + (dy*dy))
+			r = d * (10**12)
 
-		dx = self.position[0] - sun.position[0]
-		dy = self.position[1] - sun.position[1]
-		d = math.sqrt((dx*dx) + (dy*dy))
-		r = d * (10**12)
+			if r != 0:
+				f = G * self.mass * planet.mass / (r*r)
+			else: 
+				f = G * self.mass * planet.mass / 0.001
+			if f == 0:
+				return (0, 0)
 
-		if r != 0:
-			f = G * self.mass * sun.mass / (r*r)
-		else: 
-			f = G * self.mass * sun.mass / 0.001
-		if f == 0:
-			return (0, 0)
+			alpha = math.atan2(dy, dx)
 
-		alpha = math.atan2(dy, dx)
+			acc = (f/self.mass) + self.acceleration
+			#self.acceleration = acc
+			#ax = -acc * math.cos(alpha)
+			#ay = -acc * math.sin(alpha)
+			ax = -acc * (dx/d) 
+			ay = -acc * (dy/d)
 
-		acc = (f/self.mass) + self.acceleration
-		#self.acceleration = acc
-		#ax = -acc * math.cos(alpha)
-		#ay = -acc * math.sin(alpha)
-		ax = -acc * (dx/d) 
-		ay = -acc * (dy/d)
+			vx2 = self.velocity[0] + (ax * DELTA_T)
+			vy2 = self.velocity[1] + (ay * DELTA_T)
+			self.velocity = [vx2, vy2]
 
-		vx2 = self.velocity[0] + (ax * DELTA_T)
-		vy2 = self.velocity[1] + (ay * DELTA_T)
-		self.velocity = [vx2, vy2]
-
-		delta_x += vx2*DELTA_T
-		delta_y += vy2*DELTA_T
+			delta_x += vx2*DELTA_T
+			delta_y += vy2*DELTA_T
 
 		return (delta_x, delta_y)
 
@@ -92,10 +95,10 @@ earth.position = [H/2 - 150*SCALE, H/2]
 mars.position = [H/2 - 219*SCALE, H/2]
 
 addition = 3
-mercury.velocity = [0.0, 368]
-venus.velocity = [0.0, 284]
-earth.velocity = [0.0, 241]
-mars.velocity = [0.0, 200]
+mercury.velocity = [0.0, 184]
+venus.velocity = [0.0, 143]
+earth.velocity = [0.0, 121]
+mars.velocity = [0.0, 100]
 
 planets = [sun, mercury, venus, earth, mars]
 
@@ -116,7 +119,7 @@ while True:
 	for p in planets:
 		p.draw(window)
 		if not p == sun:
-			delta_position = p.calculate_gravity(sun)
+			delta_position = p.calculate_gravity(planets)
 			p.move(delta_position[0], delta_position[1])
 
 	pygame.display.update()
